@@ -34,6 +34,21 @@ case $ACTION in
             set +x
         fi
         ;;
+    odobld)
+        echo "AJM: DISABLE_RUN_CMD_ODO = $DISABLE_RUN_CMD_ODO"
+        if [ ! -z $NOOP_APPSODY_DEV ]
+        then
+            echo appsody run/debug/test not supported when .appsody-nodev detected.
+            exit 0
+        else
+            echo "before bld cmd"
+            set -x
+            #touch ./.disable-run-cmd
+            mvn -B -Plocal-dev -DappsDirectory=apps -Dmaven.repo.local=/mvn/repository liberty:create pre-integration-test liberty:install-feature
+            set +x
+            echo "AJM: after bld cmd"
+         fi
+         ;;
     odorun)
         echo "AJM: DISABLE_RUN_CMD_ODO = $DISABLE_RUN_CMD_ODO"
         if [ ! -z $NOOP_APPSODY_DEV ]
@@ -41,16 +56,12 @@ case $ACTION in
             echo appsody run/debug/test not supported when .appsody-nodev detected.
             exit 0
         else
-            if [ -z $DISABLE_RUN_CMD_ODO ]
-            then
-                set -x
-				echo "started devmode, will set marker to indicate it does not need to be run again"
-                touch ./.disable-run-cmd
-                mvn -B -Plocal-dev -DappsDirectory=apps -Ddebug=false -Dmaven.repo.local=/mvn/repository pre-integration-test liberty:dev
-                set +x
-            else
-                echo "no need to re-invoke devmode"
-            fi
+            echo "before run cmd"
+            set -x
+            #touch ./.disable-run-cmd
+            mvn -B -Plocal-dev -DappsDirectory=apps -Dmaven.repo.local=/mvn/repository liberty:start liberty:deploy
+            set +x
+            echo "AJM: after run cmd"
         fi
         ;;
     debug)
